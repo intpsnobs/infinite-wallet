@@ -7,13 +7,28 @@ export class Wallet implements IWallet {
   suffixes: string;
   flow: number;
 
-  constructor(money?: number[]) {
+  constructor(money?: string | number[]) {
     this.suffixes = " KMBTqQsSOND";
-    this.money = money || [];
     this.flow = 1000;
+    this.money = this.formatNumber(money) || [];
   }
 
-  add(other: IWallet) {
+  public formatNumber(money: string | number[]): number[] {
+    if (Array.isArray(money)) {
+      return money;
+    } else {
+      const clearMoney = money.replace(".", " ");
+      const reverseMoney = clearMoney.split("").reverse();
+      const array = [];
+      for (let i = 0; i < reverseMoney.length; i+=3) {
+        const joinArr = reverseMoney.slice(i, i + 3).reverse().join("");
+        array.push(Number(joinArr));
+      }
+      return array;
+    }
+  }
+
+  public add(other: IWallet) {
     let wallen = this.money.length;
     let othlen = other.money.length;
 
@@ -41,7 +56,7 @@ export class Wallet implements IWallet {
     }
   }
 
-  sub(other: IWallet) {
+  public sub(other: IWallet) {
     let wallen = this.money.length;
     let othlen = other.money.length;
 
@@ -69,11 +84,11 @@ export class Wallet implements IWallet {
     }
   }
 
-  get() {
+  public get() {
     return this.money;
   }
 
-  getSuffixFor(suffix: number) {
+  private getSuffixFor(suffix: number) {
     let deesCount = Math.floor(suffix / (this.suffixes.length - 1));
     let dees = "";
     for(let i=0; i < deesCount; i++) {
@@ -88,7 +103,7 @@ export class Wallet implements IWallet {
     return `${this.suffixes[suffixPreffix]}${dees}`;
   }
 
-  toString() {
+  public toString() {
     let suffix = this.money.length-1;
     if (suffix == 0) {
       return `${this.money[0]}`;

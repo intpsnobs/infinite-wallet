@@ -4,6 +4,7 @@
   "description": "",
   "main": "script.js",
   "scripts": {
+    "build": "tsc",
     "test": "./node_modules/.bin/jest"
   },
   "keywords": [],
