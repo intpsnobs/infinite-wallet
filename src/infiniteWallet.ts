@@ -11,6 +11,7 @@ export class Wallet implements IWallet {
     this.suffixes = " KMBTqQsSOND";
     this.flow = 1000;
     this.money = this.formatNumber(money) || [];
+    this.clearMoney();
   }
 
   public formatNumber(money: string | number[]): number[] {
@@ -25,6 +26,21 @@ export class Wallet implements IWallet {
         array.push(Number(joinArr));
       }
       return array;
+    }
+  }
+
+  /**
+   * Removes trailing zeros in the array
+   * eg. [100,0,0] --> [100]
+   */
+  private clearMoney() {
+    for (let i = this.money.length - 1; i > 0; i--) {
+      if (this.money[i] === 0) {
+        this.money.splice(i,1)
+      } else {
+        // if the money is greater than zero, exit the loop
+        return;
+      }
     }
   }
 
@@ -54,11 +70,26 @@ export class Wallet implements IWallet {
         }
       }
     }
+    this.clearMoney();
+  }
+
+  public isBigger(w: number[], o: number[]) {
+    let isBigger = w.length > o.length;
+    if (w.length === o.length) {
+      for (let i = w.length - 1; i >= 0; i--) {
+        if (w[i] !== o[i]) {
+          return w[i] > o[i];
+        }
+      }
+    }
+
+    return isBigger;
   }
 
   public sub(other: IWallet) {
     let wallen = this.money.length;
     let othlen = other.money.length;
+    // const isBigger = this.isBigger(this.money, other.money)
 
     for (let i = 0; i < othlen - wallen; i++) {
       this.money.push(0);
@@ -66,7 +97,7 @@ export class Wallet implements IWallet {
 
     for (let i=0; i < this.money.length; i++) {
       if (other.money[i] !== undefined) {
-        this.money[i] -= other.money[i];
+        this.money[i] -= other.money[i];//100 - 0
       }
 
       let underflow = this.money[i] < 0;
@@ -75,13 +106,14 @@ export class Wallet implements IWallet {
         if (this.money[i+1] !== undefined)
           this.money[i+1] -= 1;
         else
-          this.money[i] = -this.money[i];
+          this.money[i] = - this.money[i];
       } else {
         if (other.money[i] === undefined) {
           return;
         }
       }
     }
+    this.clearMoney();
   }
 
   public get() {
